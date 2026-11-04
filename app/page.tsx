@@ -131,7 +131,7 @@ export default function MenuDisplay() {
           return {
             ...prev,
             items: prev.items.map((item) =>
-              item._id === payload.itemId
+              String(item._id) === String(payload.itemId)
                 ? { ...item, available: payload.available }
                 : item
             ),

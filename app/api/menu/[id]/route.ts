@@ -23,7 +23,7 @@ export async function PATCH(
 
   try {
     await pusherServer.trigger("jhupri-channel", "item-update", {
-      itemId: id,
+      itemId: String(id),
       available,
     });
   } catch (err) {

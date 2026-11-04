@@ -121,7 +121,7 @@ export default function AdminPage() {
           return {
             ...prev,
             items: prev.items.map((item) =>
-              item._id === payload.itemId
+              String(item._id) === String(payload.itemId)
                 ? { ...item, available: payload.available }
                 : item
             ),
@@ -137,28 +137,38 @@ export default function AdminPage() {
   }, [fetchMenu]);
 
   const toggleItem = async (item: MenuItem) => {
-    setSaving(item._id);
+    const targetId = String(item._id);
+    const newAvailable = !item.available;
+
+    // 1. Instant optimistic update so UI flips immediately
+    setData((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        items: prev.items.map((i) =>
+          String(i._id) === targetId ? { ...i, available: newAvailable } : i
+        ),
+      };
+    });
+
+    setSaving(targetId);
     try {
-      const res = await fetch(`/api/menu/${item._id}`, {
+      const res = await fetch(`/api/menu/${targetId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ available: !item.available }),
+        body: JSON.stringify({ available: newAvailable }),
       });
       if (res.ok) {
-        setData((prev) =>
-          prev
-            ? {
-                ...prev,
-                items: prev.items.map((i) =>
-                  i._id === item._id ? { ...i, available: !i.available } : i
-                ),
-              }
-            : prev
-        );
         showToast(
-          `"${item.name}" ${!item.available ? "চালু" : "বন্ধ"} করা হয়েছে`
+          `"${item.name}" ${newAvailable ? "চালু" : "বন্ধ"} করা হয়েছে`
         );
+      } else {
+        // Revert on failure
+        fetchMenu();
       }
+    } catch {
+      // Revert on network error
+      fetchMenu();
     } finally {
       setSaving(null);
     }
@@ -245,33 +255,33 @@ export default function AdminPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-6">
-            <section className="bg-white/5 border border-white/10 rounded-2xl p-5">
-              <h2 className="text-lg font-bold text-white/80 mb-4">
+            <section className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5">
+              <h2 className="text-base sm:text-lg font-bold text-white/80 mb-3">
                 অর্ডার নম্বর
               </h2>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
                 <div className="flex flex-col">
-                  <span className="text-xs text-white/40 mb-1">
+                  <span className="text-[11px] sm:text-xs text-white/40 mb-0.5">
                     বর্তমান অর্ডার
                   </span>
-                  <span className="text-4xl font-black text-orange-400 tabular-nums">
+                  <span className="text-3xl sm:text-4xl font-black text-orange-400 tabular-nums">
                     {data.currentOrder}
                   </span>
                 </div>
-                <div className="h-12 w-px bg-white/10 mx-3" />
-                <div className="flex items-center gap-2">
+                <div className="h-10 sm:h-12 w-px bg-white/10 mx-1 sm:mx-2" />
+                <div className="flex items-center gap-2 flex-wrap">
                   <input
                     type="number"
                     min={1}
                     value={orderInput}
                     onChange={(e) => setOrderInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && saveOrder()}
-                    className="w-28 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-lg font-bold text-white text-center focus:outline-none focus:border-orange-400/60 tabular-nums"
+                    className="w-20 sm:w-28 bg-white/10 border border-white/20 rounded-lg px-2.5 py-1.5 sm:py-2 text-base sm:text-lg font-bold text-white text-center focus:outline-none focus:border-orange-400/60 tabular-nums"
                   />
                   <button
                     onClick={saveOrder}
                     disabled={orderSaving}
-                    className="bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg transition-colors text-sm"
+                    className="bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-white font-bold px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm shrink-0"
                   >
                     {orderSaving ? "…" : "সেট করুন"}
                   </button>
@@ -290,7 +300,7 @@ export default function AdminPage() {
                         showToast(`অর্ডার নম্বর ${next} সেট করা হয়েছে`);
                       });
                     }}
-                    className="bg-white/10 hover:bg-white/20 text-white font-bold px-4 py-2 rounded-lg transition-colors text-sm border border-white/10"
+                    className="bg-white/10 hover:bg-white/20 text-white font-bold px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm border border-white/10 shrink-0"
                   >
                     +১ পরবর্তী
                   </button>
@@ -298,24 +308,24 @@ export default function AdminPage() {
               </div>
             </section>
 
-            <section className="bg-white/5 border border-white/10 rounded-2xl p-5">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h2 className="text-lg font-bold text-white/80">
+            <section className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <div className="min-w-0">
+                  <h2 className="text-base sm:text-lg font-bold text-white/80">
                     ডিসপ্লে স্কেল / জুম (Display Scale)
                   </h2>
                   <p className="text-xs text-white/40 mt-0.5">
-                    টিভি স্ক্রিনের সাইজ অনুযায়ী লেখার সাইজ বড়-ছোট করুন। ডিসপ্লে পেজ ২ সেকেন্ডে অটো আপডেট হবে।
+                    টিভি স্ক্রিনের সাইজ অনুযায়ী সাইজ পরিবর্তন করুন।
                   </p>
                 </div>
-                <span className="text-3xl font-black text-orange-400 tabular-nums bg-white/5 border border-white/10 px-3 py-1 rounded-xl">
+                <span className="text-2xl sm:text-3xl font-black text-orange-400 tabular-nums bg-white/5 border border-white/10 px-3 py-1 rounded-xl shrink-0">
                   {scaleInput}%
                 </span>
               </div>
 
-              <div className="flex items-center gap-4 my-4">
+              <div className="flex items-center gap-2.5 sm:gap-3 my-3">
                 <ZoomOut className="w-4 h-4 text-white/40 shrink-0" />
-                <span className="text-xs text-white/40">50%</span>
+                <span className="text-[11px] sm:text-xs text-white/40 font-mono shrink-0">50%</span>
                 <input
                   type="range"
                   min="50"
@@ -325,46 +335,57 @@ export default function AdminPage() {
                   onChange={(e) => setScaleInput(Number(e.target.value))}
                   onMouseUp={(e) => saveScale(Number((e.target as HTMLInputElement).value))}
                   onTouchEnd={(e) => saveScale(Number((e.target as HTMLInputElement).value))}
-                  className="flex-1 accent-orange-500 cursor-pointer h-2 bg-white/20 rounded-lg"
+                  className="flex-1 accent-orange-500 cursor-pointer h-2 bg-white/20 rounded-lg min-w-0"
                 />
-                <span className="text-xs text-white/40">300%</span>
+                <span className="text-[11px] sm:text-xs text-white/40 font-mono shrink-0">300%</span>
                 <ZoomIn className="w-4 h-4 text-white/40 shrink-0" />
+              </div>
+
+              <div className="flex items-center justify-between sm:justify-end gap-2 mb-4">
+                <span className="text-xs text-white/40 sm:hidden">সরাসরি মান লিখুন:</span>
                 <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    min="50"
-                    max="300"
-                    value={scaleInput}
-                    onChange={(e) => setScaleInput(Number(e.target.value))}
-                    onKeyDown={(e) => e.key === "Enter" && saveScale(scaleInput)}
-                    className="w-20 bg-white/10 border border-white/20 rounded-lg px-2 py-1.5 text-center font-bold text-sm text-white focus:outline-none focus:border-orange-400"
-                  />
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="50"
+                      max="300"
+                      value={scaleInput}
+                      onChange={(e) => setScaleInput(Number(e.target.value))}
+                      onKeyDown={(e) => e.key === "Enter" && saveScale(scaleInput)}
+                      className="w-20 sm:w-24 bg-white/10 border border-white/20 rounded-lg px-2.5 py-1.5 text-center font-bold text-sm text-white focus:outline-none focus:border-orange-400"
+                    />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-white/40 font-bold pointer-events-none">%</span>
+                  </div>
                   <button
                     onClick={() => saveScale(scaleInput)}
                     disabled={scaleSaving}
-                    className="bg-orange-500 hover:bg-orange-400 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition-colors"
+                    className="bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-white font-bold px-3.5 py-1.5 rounded-lg text-xs transition-colors shrink-0"
                   >
                     {scaleSaving ? "…" : "সেভ"}
                   </button>
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 pt-1">
-                <span className="text-xs text-white/40 mr-1">কুইক সিলেক্ট:</span>
-                {[80, 90, 100, 110, 125, 150, 175, 200, 250, 300].map((val) => (
-                  <button
-                    key={val}
-                    onClick={() => saveScale(val)}
-                    disabled={scaleSaving}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                      (data.scale ?? 100) === val
-                        ? "bg-orange-500 text-white shadow-md shadow-orange-500/30 scale-105"
-                        : "bg-white/10 hover:bg-white/20 text-white/70 border border-white/10"
-                    }`}
-                  >
-                    {val}% {val === 100 ? "(স্বাভাবিক)" : ""}
-                  </button>
-                ))}
+              <div className="pt-3 border-t border-white/5">
+                <span className="text-xs font-semibold text-white/40 block mb-2">
+                  কুইক সিলেক্ট (Quick Select):
+                </span>
+                <div className="grid grid-cols-5 sm:flex sm:flex-wrap gap-1.5 sm:gap-2">
+                  {[80, 90, 100, 110, 125, 150, 175, 200, 250, 300].map((val) => (
+                    <button
+                      key={val}
+                      onClick={() => saveScale(val)}
+                      disabled={scaleSaving}
+                      className={`py-2 px-1 sm:px-3 rounded-lg text-xs font-bold transition-all text-center ${
+                        (data.scale ?? 100) === val
+                          ? "bg-orange-500 text-white shadow-md shadow-orange-500/30 scale-105 font-black"
+                          : "bg-white/10 hover:bg-white/20 text-white/70 border border-white/10"
+                      }`}
+                    >
+                      {val}%
+                    </button>
+                  ))}
+                </div>
               </div>
             </section>
 

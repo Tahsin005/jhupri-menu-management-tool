@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@100..800&family=Geomini:wght@200..800&family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Anek Bangla', 'Google Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Google Sans', 'Anek Bangla', serif;
+  --font-bangla: 'Anek Bangla', sans-serif;
+}
+
+body, html {
+  font-family: 'Anek Bangla', 'Google Sans', 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.small-device-warning {
+  display: none;
+}
+
+@media (max-width: 1023px), (orientation: portrait), (max-height: 520px) {
+  .small-device-warning {
+    display: flex !important;
+  }
+}

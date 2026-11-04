@@ -28,7 +28,7 @@ interface MenuData {
 const CATEGORY_LABELS: Record<string, string> = {
   fuchka: "ফুচকা | Fuchka",
   chatpati: "চটপটি | Chatpati",
-  corn: "মসলা কর্ন | Corn",
+  corn: "মাসালা কর্ন | Corn",
 };
 
 const PRICES: Record<string, number> = {
@@ -52,7 +52,7 @@ const BN: Record<string, string> = {
   "Regular Chatpati": "রেগুলার চটপটি",
   "Naga Chatpati": "নাগা চটপটি",
   "Shahi Chatpati": "শাহী চটপটি",
-  "Regular Masala Corn": "রেগুলার মসলা কর্ন",
+  "Regular Masala Corn": "রেগুলার মাসালা কর্ন",
   "Sweet Chili Corn": "সুইট চিলি কর্ন",
   "Naga Corn": "নাগা কর্ন",
 };

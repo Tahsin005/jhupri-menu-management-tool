@@ -39,7 +39,7 @@ const BN_TITLES: Record<string, string> = {
   "Regular Chatpati": "রেগুলার চটপটি | Regular Chatpati",
   "Naga Chatpati": "নাগা চটপটি | Naga Chatpati",
   "Shahi Chatpati": "শাহী চটপটি | Shahi Chatpati",
-  "Regular Masala Corn": "রেগুলার মসলা কর্ন | Regular Corn",
+  "Regular Masala Corn": "রেগুলার মাসালা কর্ন | Regular Corn",
   "Sweet Chili Corn": "সুইট চিলি কর্ন | Sweet Chili Corn",
   "Naga Corn": "নাগা কর্ন | Naga Corn",
 };
@@ -372,7 +372,7 @@ export default function MenuDisplay() {
             <div>
               <div className="flex items-baseline justify-between pb-1.5">
                 <h2 className="text-white font-extrabold text-xl lg:text-2xl tracking-wide">
-                  মসলা কর্ন{" "}
+                  মাসালা কর্ন{" "}
                   <span className="text-white/70 text-base font-normal tracking-wider">
                     | CORN
                   </span>

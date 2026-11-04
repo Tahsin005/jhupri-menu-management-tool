@@ -3,11 +3,11 @@ import MenuItem from "@/lib/models/MenuItem";
 import OrderState from "@/lib/models/OrderState";
 
 const DEFAULT_MENU = [
-  // Fuska
-  { name: "Regular Fuska", category: "fuska" },
-  { name: "Naga Fuska", category: "fuska" },
-  { name: "Shahi Fuska", category: "fuska" },
-  { name: "Doi Fuska", category: "fuska" },
+  // Fuchka
+  { name: "Regular Fuchka", category: "fuchka" },
+  { name: "Naga Fuchka", category: "fuchka" },
+  { name: "Shahi Fuchka", category: "fuchka" },
+  { name: "Doi Fuchka", category: "fuchka" },
   // Chatpati
   { name: "Regular Chatpati", category: "chatpati" },
   { name: "Naga Chatpati", category: "chatpati" },

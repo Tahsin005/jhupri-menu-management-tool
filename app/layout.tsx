@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Jhupri Menu",
-  description: "Fuska & Chatpati menu display for Jhupri, Cox's Bazar",
+  description: "Fuchka & Chatpati menu display for Jhupri, Cox's Bazar",
   icons: {
     icon: "/favicon.ico",
     apple: "/icon.png",

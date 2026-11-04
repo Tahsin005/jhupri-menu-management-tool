@@ -8,7 +8,7 @@ import { getPusherClient } from "@/lib/pusher-client";
 interface MenuItem {
   _id: string;
   name: string;
-  category: "fuska" | "chatpati" | "corn";
+  category: "fuchka" | "chatpati" | "corn";
   available: boolean;
 }
 
@@ -19,10 +19,10 @@ interface MenuData {
 }
 
 const PRICES: Record<string, number> = {
-  "Regular Fuska": 100,
-  "Naga Fuska": 100,
-  "Shahi Fuska": 120,
-  "Doi Fuska": 150,
+  "Regular Fuchka": 100,
+  "Naga Fuchka": 100,
+  "Shahi Fuchka": 120,
+  "Doi Fuchka": 150,
   "Regular Chatpati": 90,
   "Naga Chatpati": 90,
   "Shahi Chatpati": 110,
@@ -32,10 +32,10 @@ const PRICES: Record<string, number> = {
 };
 
 const BN_TITLES: Record<string, string> = {
-  "Regular Fuska": "রেগুলার ফুচকা | Regular Fuchka",
-  "Naga Fuska": "নাগা ফুচকা | Naga Fuchka",
-  "Shahi Fuska": "শাহী ফুচকা | Shahi Fuchka",
-  "Doi Fuska": "দই ফুচকা | Doi Fuchka",
+  "Regular Fuchka": "রেগুলার ফুচকা | Regular Fuchka",
+  "Naga Fuchka": "নাগা ফুচকা | Naga Fuchka",
+  "Shahi Fuchka": "শাহী ফুচকা | Shahi Fuchka",
+  "Doi Fuchka": "দই ফুচকা | Doi Fuchka",
   "Regular Chatpati": "রেগুলার চটপটি | Regular Chatpati",
   "Naga Chatpati": "নাগা চটপটি | Naga Chatpati",
   "Shahi Chatpati": "শাহী চটপটি | Shahi Chatpati",
@@ -45,10 +45,10 @@ const BN_TITLES: Record<string, string> = {
 };
 
 const ICONS: Record<string, string> = {
-  "Regular Fuska": "🍲",
-  "Naga Fuska": "🌶️",
-  "Shahi Fuska": "👑",
-  "Doi Fuska": "🥣",
+  "Regular Fuchka": "🍲",
+  "Naga Fuchka": "🌶️",
+  "Shahi Fuchka": "👑",
+  "Doi Fuchka": "🥣",
   "Regular Chatpati": "🍲",
   "Naga Chatpati": "🌶️",
   "Shahi Chatpati": "👑",
@@ -171,7 +171,7 @@ export default function MenuDisplay() {
     );
   }
 
-  const fuska = data.items.filter((i) => i.category === "fuska");
+  const fuchka = data.items.filter((i) => i.category === "fuchka");
   const chatpati = data.items.filter((i) => i.category === "chatpati");
   const corn = data.items.filter((i) => i.category === "corn");
   const scale = data.scale ?? 100;
@@ -302,7 +302,7 @@ export default function MenuDisplay() {
             </div>
 
             <div className="flex flex-col gap-3">
-              {fuska.map((item) => (
+              {fuchka.map((item) => (
                 <ItemRow key={item._id} item={item} />
               ))}
             </div>
@@ -323,7 +323,7 @@ export default function MenuDisplay() {
 
               <div className="absolute bottom-[2%] left-0 w-[56%] aspect-[659/456] z-20 drop-shadow-[0_20px_35px_rgba(0,0,0,0.9)]">
                 <Image
-                  src="/food-items/fuska.png"
+                  src="/food-items/fuchka.png"
                   alt="Jhupri Special Fuchka"
                   fill
                   sizes="35vw"

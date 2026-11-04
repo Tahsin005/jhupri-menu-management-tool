@@ -15,7 +15,7 @@ import { getPusherClient } from "@/lib/pusher-client";
 interface MenuItem {
   _id: string;
   name: string;
-  category: "fuska" | "chatpati" | "corn";
+  category: "fuchka" | "chatpati" | "corn";
   available: boolean;
 }
 
@@ -26,29 +26,29 @@ interface MenuData {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  fuska: "ফুচকা | Fuchka",
+  fuchka: "ফুচকা | Fuchka",
   chatpati: "চটপটি | Chatpati",
   corn: "মসলা কর্ন | Corn",
 };
 
 const PRICES: Record<string, number> = {
-  "Regular Fuska": 100,
-  "Naga Fuska": 100,
-  "Shahi Fuska": 120,
-  "Doi Fuska": 150,
+  "Regular Fuchka": 100,
+  "Naga Fuchka": 100,
+  "Shahi Fuchka": 120,
+  "Doi Fuchka": 150,
   "Regular Chatpati": 90,
   "Naga Chatpati": 90,
   "Shahi Chatpati": 110,
-  "Regular Masala Corn": 80,
-  "Sweet Chili Corn": 80,
-  "Naga Corn": 90,
+  "Regular Masala Corn": 100,
+  "Sweet Chili Corn": 110,
+  "Naga Corn": 125,
 };
 
 const BN: Record<string, string> = {
-  "Regular Fuska": "রেগুলার ফুচকা",
-  "Naga Fuska": "নাগা ফুচকা",
-  "Shahi Fuska": "শাহী ফুচকা",
-  "Doi Fuska": "দই ফুচকা",
+  "Regular Fuchka": "রেগুলার ফুচকা",
+  "Naga Fuchka": "নাগা ফুচকা",
+  "Shahi Fuchka": "শাহী ফুচকা",
+  "Doi Fuchka": "দই ফুচকা",
   "Regular Chatpati": "রেগুলার চটপটি",
   "Naga Chatpati": "নাগা চটপটি",
   "Shahi Chatpati": "শাহী চটপটি",
@@ -58,7 +58,7 @@ const BN: Record<string, string> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  fuska: "bg-orange-500/10 border-orange-500/30",
+  fuchka: "bg-orange-500/10 border-orange-500/30",
   chatpati: "bg-red-500/10 border-red-500/30",
   corn: "bg-yellow-500/10 border-yellow-500/30",
 };
@@ -212,7 +212,7 @@ export default function AdminPage() {
     }
   };
 
-  const categories = (["fuska", "chatpati", "corn"] as const);
+  const categories = (["fuchka", "chatpati", "corn"] as const);
 
   return (
     <div className="min-h-screen bg-[#0f0602] text-white p-6 font-sans">

@@ -77,6 +77,7 @@ export default function AdminPage() {
   const [scaleInput, setScaleInput] = useState<number>(100);
   const [saving, setSaving] = useState<string | null>(null);
   const [orderSaving, setOrderSaving] = useState(false);
+  const [nextOrderSaving, setNextOrderSaving] = useState(false);
   const [scaleSaving, setScaleSaving] = useState(false);
   const [showScaleModal, setShowScaleModal] = useState(false);
   const [waterSaving, setWaterSaving] = useState(false);
@@ -202,6 +203,25 @@ export default function AdminPage() {
       }
     } finally {
       setOrderSaving(false);
+    }
+  };
+
+  const saveNextOrder = async () => {
+    const next = (data?.currentOrder ?? 0) + 1;
+    setNextOrderSaving(true);
+    setOrderInput(String(next));
+    try {
+      const res = await fetch("/api/order", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentOrder: next }),
+      });
+      if (res.ok) {
+        setData((prev) => (prev ? { ...prev, currentOrder: next } : prev));
+        showToast(`অর্ডার নম্বর ${next} সেট করা হয়েছে`);
+      }
+    } finally {
+      setNextOrderSaving(false);
     }
   };
 
@@ -336,19 +356,19 @@ export default function AdminPage() {
                     saveOrder();
                   }}
                   className="flex items-center gap-2 flex-wrap"
-                  aria-busy={orderSaving}
+                  aria-busy={orderSaving || nextOrderSaving}
                 >
                   <input
                     type="number"
                     min={1}
                     value={orderInput}
                     onChange={(e) => setOrderInput(e.target.value)}
-                    disabled={orderSaving}
+                    disabled={orderSaving || nextOrderSaving}
                     className="w-20 sm:w-28 bg-white/10 border border-white/20 rounded-lg px-2.5 py-1.5 sm:py-2 text-base sm:text-lg font-bold text-white text-center focus:outline-none focus:border-orange-400/60 tabular-nums disabled:opacity-50"
                   />
                   <button
                     type="submit"
-                    disabled={orderSaving}
+                    disabled={orderSaving || nextOrderSaving}
                     className="bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-white font-bold px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm shrink-0 inline-flex items-center gap-1.5"
                   >
                     {orderSaving && (
@@ -358,23 +378,14 @@ export default function AdminPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      const next = data.currentOrder + 1;
-                      setOrderInput(String(next));
-                      fetch("/api/order", {
-                        method: "PATCH",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ currentOrder: next }),
-                      }).then(() => {
-                        setData((prev) =>
-                          prev ? { ...prev, currentOrder: next } : prev
-                        );
-                        showToast(`অর্ডার নম্বর ${next} সেট করা হয়েছে`);
-                      });
-                    }}
-                    className="bg-white/10 hover:bg-white/20 text-white font-bold px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm border border-white/10 shrink-0"
+                    onClick={saveNextOrder}
+                    disabled={orderSaving || nextOrderSaving}
+                    className="bg-white/10 hover:bg-white/20 disabled:opacity-50 text-white font-bold px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm border border-white/10 shrink-0 inline-flex items-center gap-1.5"
                   >
-                    +১ পরবর্তী
+                    {nextOrderSaving && (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
+                    )}
+                    {nextOrderSaving ? "সেট হচ্ছে..." : "+১ পরবর্তী"}
                   </button>
                 </form>
               </div>

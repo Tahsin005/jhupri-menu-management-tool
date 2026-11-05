@@ -296,12 +296,6 @@ export default function AdminPage() {
               height={52}
               className="rounded-full border border-[#c47a35]/50 shadow-md"
             />
-            <div>
-              <h1 className="text-3xl font-black text-[#c47a35]">
-                ঝুপড়ি - অ্যাডমিন
-              </h1>
-              <p className="text-white/40 text-sm mt-0.5">Menu Management Panel</p>
-            </div>
           </div>
           <div className="flex items-center gap-2">
             <button

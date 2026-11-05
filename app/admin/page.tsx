@@ -269,7 +269,7 @@ export default function AdminPage() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <Image
-              src="/logo.jpg"
+              src="/logo.svg"
               alt="Jhupri"
               width={52}
               height={52}

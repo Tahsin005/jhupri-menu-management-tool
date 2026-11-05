@@ -161,7 +161,7 @@ export default function MenuDisplay() {
         }}
       >
         <Image
-          src="/logo.jpg"
+          src="/logo.svg"
           alt="Jhupri"
           width={130}
           height={130}
@@ -183,7 +183,7 @@ export default function MenuDisplay() {
       <div className="small-device-warning fixed inset-0 z-50 bg-[#0c0502] flex-col items-center justify-center p-6 text-center select-none overflow-y-auto">
         <div className="max-w-md w-full flex flex-col items-center my-auto">
           <Image
-            src="/logo.jpg"
+            src="/logo.svg"
             alt="Jhupri Logo"
             width={84}
             height={84}
@@ -241,7 +241,7 @@ export default function MenuDisplay() {
       <div className="w-28 lg:w-36 shrink-0 flex flex-col justify-between h-full py-1">
         <div className="flex flex-col items-center justify-center">
           <Image
-            src="/logo.jpg"
+            src="/logo.svg"
             alt="Jhupri Logo"
             width={110}
             height={110}

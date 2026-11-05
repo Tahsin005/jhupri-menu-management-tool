@@ -15,6 +15,7 @@ import {
   Droplets,
   AlertTriangle,
   X,
+  Loader2,
 } from "lucide-react";
 import { getPusherClient } from "@/lib/pusher-client";
 
@@ -329,23 +330,34 @@ export default function AdminPage() {
                   </span>
                 </div>
                 <div className="h-10 sm:h-12 w-px bg-white/10 mx-1 sm:mx-2" />
-                <div className="flex items-center gap-2 flex-wrap">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    saveOrder();
+                  }}
+                  className="flex items-center gap-2 flex-wrap"
+                  aria-busy={orderSaving}
+                >
                   <input
                     type="number"
                     min={1}
                     value={orderInput}
                     onChange={(e) => setOrderInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && saveOrder()}
-                    className="w-20 sm:w-28 bg-white/10 border border-white/20 rounded-lg px-2.5 py-1.5 sm:py-2 text-base sm:text-lg font-bold text-white text-center focus:outline-none focus:border-orange-400/60 tabular-nums"
+                    disabled={orderSaving}
+                    className="w-20 sm:w-28 bg-white/10 border border-white/20 rounded-lg px-2.5 py-1.5 sm:py-2 text-base sm:text-lg font-bold text-white text-center focus:outline-none focus:border-orange-400/60 tabular-nums disabled:opacity-50"
                   />
                   <button
-                    onClick={saveOrder}
+                    type="submit"
                     disabled={orderSaving}
-                    className="bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-white font-bold px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm shrink-0"
+                    className="bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-white font-bold px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm shrink-0 inline-flex items-center gap-1.5"
                   >
-                    {orderSaving ? "…" : "সেট করুন"}
+                    {orderSaving && (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
+                    )}
+                    {orderSaving ? "সেট হচ্ছে..." : "সেট করুন"}
                   </button>
                   <button
+                    type="button"
                     onClick={() => {
                       const next = data.currentOrder + 1;
                       setOrderInput(String(next));
@@ -364,7 +376,7 @@ export default function AdminPage() {
                   >
                     +১ পরবর্তী
                   </button>
-                </div>
+                </form>
               </div>
             </section>
 
@@ -681,4 +693,3 @@ export default function AdminPage() {
     </div>
   );
 }
-

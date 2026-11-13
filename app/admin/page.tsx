@@ -78,6 +78,9 @@ export default function AdminPage() {
   const [saving, setSaving] = useState<string | null>(null);
   const [orderSaving, setOrderSaving] = useState(false);
   const [nextOrderSaving, setNextOrderSaving] = useState(false);
+  const [prevOrderSaving, setPrevOrderSaving] = useState(false);
+  const [resetOrderSaving, setResetOrderSaving] = useState(false);
+  const [showResetOrderModal, setShowResetOrderModal] = useState(false);
   const [scaleSaving, setScaleSaving] = useState(false);
   const [showScaleModal, setShowScaleModal] = useState(false);
   const [waterSaving, setWaterSaving] = useState(false);
@@ -225,6 +228,46 @@ export default function AdminPage() {
     }
   };
 
+  const savePrevOrder = async () => {
+    const current = data?.currentOrder ?? 1;
+    if (current <= 1) return;
+    const prevNum = current - 1;
+    setPrevOrderSaving(true);
+    setOrderInput(String(prevNum));
+    try {
+      const res = await fetch("/api/order", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentOrder: prevNum }),
+      });
+      if (res.ok) {
+        setData((prev) => (prev ? { ...prev, currentOrder: prevNum } : prev));
+        showToast(`অর্ডার নম্বর ${prevNum} সেট করা হয়েছে`);
+      }
+    } finally {
+      setPrevOrderSaving(false);
+    }
+  };
+
+  const resetOrder = async () => {
+    const resetNum = 1;
+    setResetOrderSaving(true);
+    setOrderInput(String(resetNum));
+    try {
+      const res = await fetch("/api/order", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentOrder: resetNum }),
+      });
+      if (res.ok) {
+        setData((prev) => (prev ? { ...prev, currentOrder: resetNum } : prev));
+        showToast("অর্ডার নম্বর ১ এ রিসেট করা হয়েছে");
+      }
+    } finally {
+      setResetOrderSaving(false);
+    }
+  };
+
   const saveScale = async (newScale: number) => {
     if (isNaN(newScale) || newScale < 50 || newScale > 300) return;
     setScaleSaving(true);
@@ -331,9 +374,21 @@ export default function AdminPage() {
         ) : (
           <div className="flex flex-col gap-6">
             <section className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5">
-              <h2 className="text-base sm:text-lg font-bold text-white/80 mb-3">
-                অর্ডার নম্বর
-              </h2>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <h2 className="text-base sm:text-lg font-bold text-white/80">
+                  অর্ডার নম্বর
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setShowResetOrderModal(true)}
+                  disabled={orderSaving || nextOrderSaving || prevOrderSaving || resetOrderSaving || (data.currentOrder <= 1)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/15 hover:bg-red-500/25 active:scale-95 border border-red-500/30 text-red-400 disabled:opacity-30 disabled:pointer-events-none transition-all text-xs font-semibold shrink-0 cursor-pointer"
+                  title="অর্ডার নম্বর রিসেট করুন"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>রিসেট</span>
+                </button>
+              </div>
               <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
                 <div className="flex flex-col">
                   <span className="text-[11px] sm:text-xs text-white/40 mb-0.5">
@@ -350,19 +405,19 @@ export default function AdminPage() {
                     saveOrder();
                   }}
                   className="flex items-center gap-2 flex-wrap"
-                  aria-busy={orderSaving || nextOrderSaving}
+                  aria-busy={orderSaving || nextOrderSaving || prevOrderSaving || resetOrderSaving}
                 >
                   <input
                     type="number"
                     min={1}
                     value={orderInput}
                     onChange={(e) => setOrderInput(e.target.value)}
-                    disabled={orderSaving || nextOrderSaving}
+                    disabled={orderSaving || nextOrderSaving || prevOrderSaving || resetOrderSaving}
                     className="w-20 sm:w-28 bg-white/10 border border-white/20 rounded-lg px-2.5 py-1.5 sm:py-2 text-base sm:text-lg font-bold text-white text-center focus:outline-none focus:border-orange-400/60 tabular-nums disabled:opacity-50"
                   />
                   <button
                     type="submit"
-                    disabled={orderSaving || nextOrderSaving}
+                    disabled={orderSaving || nextOrderSaving || prevOrderSaving || resetOrderSaving}
                     className="bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-white font-bold px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm shrink-0 inline-flex items-center gap-1.5"
                   >
                     {orderSaving && (
@@ -372,14 +427,29 @@ export default function AdminPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={saveNextOrder}
-                    disabled={orderSaving || nextOrderSaving}
+                    onClick={savePrevOrder}
+                    disabled={orderSaving || nextOrderSaving || prevOrderSaving || resetOrderSaving || (data.currentOrder <= 1)}
                     className="bg-white/10 hover:bg-white/20 disabled:opacity-50 text-white font-bold px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm border border-white/10 shrink-0 inline-flex items-center gap-1.5"
+                    title="আগের অর্ডার নম্বরে যান"
+                  >
+                    {prevOrderSaving && (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
+                    )}
+                    <Minus className="w-3.5 h-3.5" />
+                    <span>{prevOrderSaving ? "সেট হচ্ছে..." : "-১ পূর্ববর্তী"}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={saveNextOrder}
+                    disabled={orderSaving || nextOrderSaving || prevOrderSaving || resetOrderSaving}
+                    className="bg-white/10 hover:bg-white/20 disabled:opacity-50 text-white font-bold px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm border border-white/10 shrink-0 inline-flex items-center gap-1.5"
+                    title="পরবর্তী অর্ডার নম্বরে যান"
                   >
                     {nextOrderSaving && (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
                     )}
-                    {nextOrderSaving ? "সেট হচ্ছে..." : "+১ পরবর্তী"}
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>{nextOrderSaving ? "সেট হচ্ছে..." : "+১ পরবর্তী"}</span>
                   </button>
                 </form>
               </div>
@@ -511,6 +581,74 @@ export default function AdminPage() {
         )}
       </div>
 
+
+      {showResetOrderModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setShowResetOrderModal(false)}
+        >
+          <div
+            className="w-full max-w-sm bg-[#180a03] border border-orange-500/30 rounded-2xl p-5 sm:p-6 shadow-2xl shadow-black flex flex-col gap-4 animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">
+                    রিসেট নিশ্চিতকরণ
+                  </h3>
+                  <p className="text-xs text-white/40">
+                    Reset Order Number
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowResetOrderModal(false)}
+                className="text-white/40 hover:text-white transition-colors p-1 rounded-lg"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-sm text-white/80 leading-relaxed">
+              আপনি কি নিশ্চিত যে বর্তমান অর্ডার নম্বর{" "}
+              <strong className="text-orange-400 font-bold">
+                {data?.currentOrder ?? 1}
+              </strong>{" "}
+              রিসেট করে <strong className="text-white">১ (এক)</strong> করতে চান?
+            </p>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setShowResetOrderModal(false)}
+                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white/80 hover:text-white text-xs sm:text-sm font-semibold transition-all cursor-pointer"
+              >
+                বাতিল (Cancel)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowResetOrderModal(false);
+                  resetOrder();
+                }}
+                disabled={resetOrderSaving}
+                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs sm:text-sm font-bold transition-all shadow-md shadow-red-950/40 cursor-pointer flex items-center gap-1.5"
+              >
+                {resetOrderSaving && (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
+                )}
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>হ্যাঁ, রিসেট করুন</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showResetWaterModal && (
         <div

@@ -367,6 +367,7 @@ export default function AdminPage() {
               alt="Jhupri"
               width={52}
               height={52}
+              priority
               className="rounded-full border border-[#c47a35]/50 shadow-md"
             />
           </div>
@@ -417,7 +418,7 @@ export default function AdminPage() {
                     className="flex items-center gap-2 bg-white/5 hover:bg-white/10 active:scale-95 px-2.5 py-1 rounded-lg border border-white/10 transition-all cursor-pointer"
                     title={data.showOrders !== false ? "টিভিতে অর্ডার নম্বর বন্ধ করুন" : "টিভিতে অর্ডার নম্বর চালু করুন"}
                   >
-                    <span className="text-[11px] sm:text-xs text-white/60">টিভিতে প্রদর্শন:</span>
+                      <span className="text-[11px] sm:text-xs text-white/60">Show:</span>
                     <span
                       className={`text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded ${
                         data.showOrders !== false
@@ -425,7 +426,7 @@ export default function AdminPage() {
                           : "bg-red-500/20 text-red-400 border border-red-500/30"
                       }`}
                     >
-                      {data.showOrders !== false ? "চালু" : "বন্ধ"}
+                      {data.showOrders !== false ? "on" : "off"}
                     </span>
                     <span
                       className={`w-7 sm:w-8 h-4 sm:h-4.5 rounded-full transition-colors relative inline-flex items-center p-0.5 ${

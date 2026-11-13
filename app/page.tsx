@@ -16,6 +16,7 @@ interface MenuData {
   items: MenuItem[];
   currentOrder: number;
   scale?: number;
+  showOrders?: boolean;
 }
 
 const PRICES: Record<string, number> = {
@@ -111,13 +112,14 @@ export default function MenuDisplay() {
 
     channel.bind(
       "order-update",
-      (payload: { currentOrder?: number; scale?: number }) => {
+      (payload: { currentOrder?: number; scale?: number; showOrders?: boolean }) => {
         setData((prev) => {
           if (!prev) return prev;
           return {
             ...prev,
             currentOrder: payload.currentOrder ?? prev.currentOrder,
             scale: payload.scale ?? prev.scale,
+            showOrders: payload.showOrders ?? prev.showOrders,
           };
         });
       }
@@ -175,6 +177,7 @@ export default function MenuDisplay() {
   const chatpati = data.items.filter((i) => i.category === "chatpati");
   const corn = data.items.filter((i) => i.category === "corn");
   const scale = data.scale ?? 100;
+  const showOrders = data.showOrders !== false;
 
   const scaleFactor = scale / 100;
 
@@ -238,7 +241,7 @@ export default function MenuDisplay() {
           transformOrigin: "top left",
         }}
       >
-      <div className="w-28 lg:w-36 shrink-0 flex flex-col justify-between h-full py-1">
+      <div className={`w-28 lg:w-36 shrink-0 flex flex-col ${showOrders ? "justify-between" : "justify-center"} h-full py-1 transition-all duration-300`}>
         <div className="flex flex-col items-center justify-center">
           <Image
             src="/logo.svg"
@@ -252,35 +255,39 @@ export default function MenuDisplay() {
           </span>
         </div>
 
-        <div className="flex-1 my-3 rounded-2xl border border-white/20 bg-black/25 backdrop-blur-xs flex flex-col items-center justify-between py-5 px-2 shadow-xl shadow-black/40">
-          <span className="text-[#dfa369] text-xs font-semibold tracking-wider text-center">
-            এখন চলছে
-          </span>
-          <span
-            className="font-serif font-black text-[#e8b958] tabular-nums leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]"
-            style={{ fontSize: "clamp(3.5rem, 5.5vw, 5rem)" }}
-          >
-            {data.currentOrder}
-          </span>
-          <span className="text-white/40 text-[9px] tracking-widest font-semibold uppercase text-center">
-            CURRENT ORDER
-          </span>
-        </div>
+        {showOrders && (
+          <>
+            <div className="flex-1 my-3 rounded-2xl border border-white/20 bg-black/25 backdrop-blur-xs flex flex-col items-center justify-between py-5 px-2 shadow-xl shadow-black/40">
+              <span className="text-[#dfa369] text-xs font-semibold tracking-wider text-center">
+                এখন চলছে
+              </span>
+              <span
+                className="font-serif font-black text-[#e8b958] tabular-nums leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]"
+                style={{ fontSize: "clamp(3.5rem, 5.5vw, 5rem)" }}
+              >
+                {data.currentOrder}
+              </span>
+              <span className="text-white/40 text-[9px] tracking-widest font-semibold uppercase text-center">
+                CURRENT ORDER
+              </span>
+            </div>
 
-        <div className="flex-1 rounded-2xl border border-white/20 bg-black/25 backdrop-blur-xs flex flex-col items-center justify-between py-5 px-2 shadow-xl shadow-black/40">
-          <span className="text-[#dfa369] text-xs font-semibold tracking-wider text-center">
-            পরবর্তী
-          </span>
-          <span
-            className="font-serif font-black text-white tabular-nums leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]"
-            style={{ fontSize: "clamp(3.5rem, 5.5vw, 5rem)" }}
-          >
-            {data.currentOrder + 1}
-          </span>
-          <span className="text-white/40 text-[9px] tracking-widest font-semibold uppercase text-center">
-            NEXT ORDER
-          </span>
-        </div>
+            <div className="flex-1 rounded-2xl border border-white/20 bg-black/25 backdrop-blur-xs flex flex-col items-center justify-between py-5 px-2 shadow-xl shadow-black/40">
+              <span className="text-[#dfa369] text-xs font-semibold tracking-wider text-center">
+                পরবর্তী
+              </span>
+              <span
+                className="font-serif font-black text-white tabular-nums leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]"
+                style={{ fontSize: "clamp(3.5rem, 5.5vw, 5rem)" }}
+              >
+                {data.currentOrder + 1}
+              </span>
+              <span className="text-white/40 text-[9px] tracking-widest font-semibold uppercase text-center">
+                NEXT ORDER
+              </span>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="flex-1 flex flex-col justify-between h-full min-w-0 relative">

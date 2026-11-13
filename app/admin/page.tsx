@@ -31,6 +31,7 @@ interface MenuData {
   currentOrder: number;
   scale?: number;
   waterBottleCount?: number;
+  showOrders?: boolean;
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -81,6 +82,7 @@ export default function AdminPage() {
   const [prevOrderSaving, setPrevOrderSaving] = useState(false);
   const [resetOrderSaving, setResetOrderSaving] = useState(false);
   const [showResetOrderModal, setShowResetOrderModal] = useState(false);
+  const [showOrdersSaving, setShowOrdersSaving] = useState(false);
   const [scaleSaving, setScaleSaving] = useState(false);
   const [showScaleModal, setShowScaleModal] = useState(false);
   const [waterSaving, setWaterSaving] = useState(false);
@@ -110,7 +112,7 @@ export default function AdminPage() {
 
     channel.bind(
       "order-update",
-      (payload: { currentOrder?: number; scale?: number; waterBottleCount?: number }) => {
+      (payload: { currentOrder?: number; scale?: number; waterBottleCount?: number; showOrders?: boolean }) => {
         setData((prev) => {
           if (!prev) return prev;
           return {
@@ -118,6 +120,7 @@ export default function AdminPage() {
             currentOrder: payload.currentOrder ?? prev.currentOrder,
             scale: payload.scale ?? prev.scale,
             waterBottleCount: payload.waterBottleCount ?? prev.waterBottleCount,
+            showOrders: payload.showOrders ?? prev.showOrders,
           };
         });
         if (typeof payload.currentOrder === "number") {
@@ -268,6 +271,33 @@ export default function AdminPage() {
     }
   };
 
+  const toggleShowOrders = async () => {
+    const current = data?.showOrders !== false;
+    const nextVal = !current;
+    setData((prev) => (prev ? { ...prev, showOrders: nextVal } : prev));
+    setShowOrdersSaving(true);
+    try {
+      const res = await fetch("/api/order", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ showOrders: nextVal }),
+      });
+      if (res.ok) {
+        showToast(
+          nextVal
+            ? "টিভি স্ক্রিনে অর্ডার নম্বর প্রদর্শন চালু করা হয়েছে"
+            : "টিভি স্ক্রিনে অর্ডার নম্বর প্রদর্শন বন্ধ করা হয়েছে"
+        );
+      } else {
+        fetchMenu();
+      }
+    } catch {
+      fetchMenu();
+    } finally {
+      setShowOrdersSaving(false);
+    }
+  };
+
   const saveScale = async (newScale: number) => {
     if (isNaN(newScale) || newScale < 50 || newScale > 300) return;
     setScaleSaving(true);
@@ -374,10 +404,43 @@ export default function AdminPage() {
         ) : (
           <div className="flex flex-col gap-6">
             <section className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5">
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <h2 className="text-base sm:text-lg font-bold text-white/80">
-                  অর্ডার নম্বর
-                </h2>
+              <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+                <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
+                  <h2 className="text-base sm:text-lg font-bold text-white/80">
+                    অর্ডার নম্বর
+                  </h2>
+                  <div className="h-4 w-px bg-white/20 hidden sm:block" />
+                  <button
+                    type="button"
+                    onClick={toggleShowOrders}
+                    disabled={showOrdersSaving}
+                    className="flex items-center gap-2 bg-white/5 hover:bg-white/10 active:scale-95 px-2.5 py-1 rounded-lg border border-white/10 transition-all cursor-pointer"
+                    title={data.showOrders !== false ? "টিভিতে অর্ডার নম্বর বন্ধ করুন" : "টিভিতে অর্ডার নম্বর চালু করুন"}
+                  >
+                    <span className="text-[11px] sm:text-xs text-white/60">টিভিতে প্রদর্শন:</span>
+                    <span
+                      className={`text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded ${
+                        data.showOrders !== false
+                          ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                          : "bg-red-500/20 text-red-400 border border-red-500/30"
+                      }`}
+                    >
+                      {data.showOrders !== false ? "চালু" : "বন্ধ"}
+                    </span>
+                    <span
+                      className={`w-7 sm:w-8 h-4 sm:h-4.5 rounded-full transition-colors relative inline-flex items-center p-0.5 ${
+                        data.showOrders !== false ? "bg-green-500" : "bg-white/20"
+                      }`}
+                    >
+                      <span
+                        className={`w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-full bg-white transition-transform ${
+                          data.showOrders !== false ? "translate-x-3 sm:translate-x-3.5" : "translate-x-0"
+                        }`}
+                      />
+                    </span>
+                  </button>
+                </div>
+
                 <button
                   type="button"
                   onClick={() => setShowResetOrderModal(true)}

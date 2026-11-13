@@ -5,7 +5,7 @@ import { pusherServer } from "@/lib/pusher-server";
 export async function PATCH(request: Request) {
   await connectDB();
   const body = await request.json();
-  const { currentOrder, scale, waterBottleCount } = body;
+  const { currentOrder, scale, waterBottleCount, showOrders } = body;
 
   let state = await OrderState.findOne({});
   if (!state) {
@@ -13,6 +13,7 @@ export async function PATCH(request: Request) {
       currentOrder: typeof currentOrder === "number" ? currentOrder : 1,
       scale: typeof scale === "number" ? scale : 100,
       waterBottleCount: typeof waterBottleCount === "number" ? Math.max(0, waterBottleCount) : 0,
+      showOrders: typeof showOrders === "boolean" ? showOrders : true,
     });
   } else {
     if (typeof currentOrder === "number") {
@@ -24,6 +25,9 @@ export async function PATCH(request: Request) {
     if (typeof waterBottleCount === "number") {
       state.waterBottleCount = Math.max(0, waterBottleCount);
     }
+    if (typeof showOrders === "boolean") {
+      state.showOrders = showOrders;
+    }
     await state.save();
   }
 
@@ -31,6 +35,7 @@ export async function PATCH(request: Request) {
     currentOrder: state.currentOrder,
     scale: state.scale ?? 100,
     waterBottleCount: state.waterBottleCount ?? 0,
+    showOrders: state.showOrders ?? true,
   };
 
   try {

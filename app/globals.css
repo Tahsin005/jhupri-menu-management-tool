@@ -2,13 +2,13 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Anek Bangla', 'Google Sans', 'Inter', system-ui, -apple-system, sans-serif;
-  --font-serif: 'Google Sans', 'Anek Bangla', serif;
+  --font-sans: 'Hind Siliguri', 'Anek Bangla', 'Google Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Hind Siliguri', 'Google Sans', 'Anek Bangla', serif;
   --font-bangla: 'Anek Bangla', sans-serif;
 }
 
 body, html {
-  font-family: 'Anek Bangla', 'Google Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Hind Siliguri', 'Anek Bangla', 'Google Sans', 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 .small-device-warning {

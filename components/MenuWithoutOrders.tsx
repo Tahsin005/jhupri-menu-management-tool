@@ -27,7 +27,7 @@ const BN_TITLES: Record<string, string> = {
   "Regular Chatpati": "রেগুলার চটপটি | Regular Chatpati",
   "Naga Chatpati": "নাগা চটপটি | Naga Chatpati",
   "Shahi Chatpati": "শাহী চটপটি | Shahi Chatpati",
-  "Regular Masala Corn": "রেগুলার মসলা কর্ন | Regular Corn",
+  "Regular Masala Corn": "রেগুলার মাসালা কর্ন | Regular Corn",
   "Sweet Chili Corn": "সুইট চিলি কর্ন | Sweet Chili Corn",
   "Naga Corn": "নাগা কর্ন | Naga Corn",
 };
@@ -123,7 +123,7 @@ export default function MenuWithoutOrders({ data, scaleFactor }: Props) {
           </div>
 
           {/* Fuchka List */}
-          <div className="pb-1">
+          <div className="pb-1 pl-6 lg:pl-10">
             <h2 className="font-serif font-black text-white text-2xl lg:text-[28px] tracking-wide mb-2.5">
               ফুচকা | Fuchka
             </h2>
@@ -180,7 +180,7 @@ export default function MenuWithoutOrders({ data, scaleFactor }: Props) {
       {/* Bottom Row: Q3 (Bottom-Left) Chatpati + Q4 (Bottom-Right) Corn */}
       <div className="flex gap-10 items-start justify-between h-[44%] min-h-0 pt-6 lg:pt-8">
         {/* Q3: Bottom-Left Quadrant (Chatpati) */}
-        <div className="w-[48%] max-w-[780px] flex flex-col justify-start h-full min-w-0">
+        <div className="w-[48%] max-w-[780px] flex flex-col justify-start h-full min-w-0 pl-6 lg:pl-10">
           <h2 className="font-serif font-black text-white text-2xl lg:text-[28px] tracking-wide mb-2.5">
             চটপটি | Chatpati
           </h2>

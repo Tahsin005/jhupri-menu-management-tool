@@ -2,7 +2,6 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IOrderState extends Document {
   currentOrder: number;
-  scale: number;
   waterBottleCount: number;
   showOrders: boolean;
 }
@@ -10,7 +9,6 @@ export interface IOrderState extends Document {
 const OrderStateSchema = new Schema<IOrderState>(
   {
     currentOrder: { type: Number, default: 1 },
-    scale: { type: Number, default: 100 },
     waterBottleCount: { type: Number, default: 0 },
     showOrders: { type: Boolean, default: true },
   },
@@ -22,4 +20,3 @@ const OrderState: Model<IOrderState> =
   mongoose.model<IOrderState>("OrderState", OrderStateSchema);
 
 export default OrderState;
-

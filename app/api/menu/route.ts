@@ -27,7 +27,7 @@ async function seedIfEmpty() {
   }
   const orderCount = await OrderState.countDocuments();
   if (orderCount === 0) {
-    await OrderState.create({ currentOrder: 1, scale: 100, waterBottleCount: 0, showOrders: true });
+    await OrderState.create({ currentOrder: 1, waterBottleCount: 0, showOrders: true });
   }
 }
 
@@ -43,7 +43,6 @@ export async function GET() {
   return Response.json({
     items,
     currentOrder: orderState?.currentOrder ?? 1,
-    scale: orderState?.scale ?? 100,
     waterBottleCount: orderState?.waterBottleCount ?? 0,
     showOrders: orderState?.showOrders ?? true,
   });

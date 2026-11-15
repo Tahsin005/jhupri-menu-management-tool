@@ -5,8 +5,7 @@ import Image from "next/image";
 import { Tv, Monitor } from "lucide-react";
 import { getPusherClient } from "@/lib/pusher-client";
 import { MenuData } from "@/components/menu-constants";
-import MenuWithOrders from "@/components/MenuWithOrders";
-import MenuWithoutOrders from "@/components/MenuWithoutOrders";
+import ImageMenuDisplay from "@/components/ImageMenuDisplay";
 
 export default function MenuDisplay() {
   const [data, setData] = useState<MenuData | null>(null);
@@ -28,13 +27,12 @@ export default function MenuDisplay() {
 
     channel.bind(
       "order-update",
-      (payload: { currentOrder?: number; scale?: number; showOrders?: boolean }) => {
+      (payload: { currentOrder?: number; showOrders?: boolean }) => {
         setData((prev) => {
           if (!prev) return prev;
           return {
             ...prev,
             currentOrder: payload.currentOrder ?? prev.currentOrder,
-            scale: payload.scale ?? prev.scale,
             showOrders: payload.showOrders ?? prev.showOrders,
           };
         });
@@ -70,14 +68,7 @@ export default function MenuDisplay() {
 
   if (!data) {
     return (
-      <div
-        className="flex items-center justify-center min-h-screen"
-        style={{
-          backgroundImage: "url('/bg.jpeg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
+      <div className="flex items-center justify-center min-h-screen bg-[#0c0502]">
         <Image
           src="/logo.svg"
           alt="Jhupri"
@@ -88,10 +79,6 @@ export default function MenuDisplay() {
       </div>
     );
   }
-
-  const scale = data.scale ?? 100;
-  const scaleFactor = scale / 100;
-  const showOrders = data.showOrders !== false;
 
   return (
     <>
@@ -140,11 +127,7 @@ export default function MenuDisplay() {
           height: "100vh",
         }}
       >
-        {showOrders ? (
-          <MenuWithOrders data={data} scaleFactor={scaleFactor} />
-        ) : (
-          <MenuWithoutOrders data={data} scaleFactor={scaleFactor} />
-        )}
+        <ImageMenuDisplay data={data} />
       </div>
     </>
   );

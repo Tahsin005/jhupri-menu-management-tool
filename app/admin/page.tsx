@@ -5,8 +5,6 @@ import Image from "next/image";
 import {
   Check,
   ExternalLink,
-  ZoomIn,
-  ZoomOut,
   CircleCheck,
   CircleX,
   Minus,
@@ -29,7 +27,6 @@ interface MenuItem {
 interface MenuData {
   items: MenuItem[];
   currentOrder: number;
-  scale?: number;
   waterBottleCount?: number;
   showOrders?: boolean;
 }
@@ -75,7 +72,6 @@ const CATEGORY_COLORS: Record<string, string> = {
 export default function AdminPage() {
   const [data, setData] = useState<MenuData | null>(null);
   const [orderInput, setOrderInput] = useState("");
-  const [scaleInput, setScaleInput] = useState<number>(100);
   const [saving, setSaving] = useState<string | null>(null);
   const [orderSaving, setOrderSaving] = useState(false);
   const [nextOrderSaving, setNextOrderSaving] = useState(false);
@@ -83,8 +79,6 @@ export default function AdminPage() {
   const [resetOrderSaving, setResetOrderSaving] = useState(false);
   const [showResetOrderModal, setShowResetOrderModal] = useState(false);
   const [showOrdersSaving, setShowOrdersSaving] = useState(false);
-  const [scaleSaving, setScaleSaving] = useState(false);
-  const [showScaleModal, setShowScaleModal] = useState(false);
   const [waterSaving, setWaterSaving] = useState(false);
   const [showResetWaterModal, setShowResetWaterModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -100,7 +94,6 @@ export default function AdminPage() {
       const json: MenuData = await res.json();
       setData(json);
       setOrderInput(String(json.currentOrder));
-      setScaleInput(json.scale ?? 100);
     }
   }, []);
 
@@ -112,22 +105,18 @@ export default function AdminPage() {
 
     channel.bind(
       "order-update",
-      (payload: { currentOrder?: number; scale?: number; waterBottleCount?: number; showOrders?: boolean }) => {
+      (payload: { currentOrder?: number; waterBottleCount?: number; showOrders?: boolean }) => {
         setData((prev) => {
           if (!prev) return prev;
           return {
             ...prev,
             currentOrder: payload.currentOrder ?? prev.currentOrder,
-            scale: payload.scale ?? prev.scale,
             waterBottleCount: payload.waterBottleCount ?? prev.waterBottleCount,
             showOrders: payload.showOrders ?? prev.showOrders,
           };
         });
         if (typeof payload.currentOrder === "number") {
           setOrderInput(String(payload.currentOrder));
-        }
-        if (typeof payload.scale === "number") {
-          setScaleInput(payload.scale);
         }
       }
     );
@@ -298,25 +287,6 @@ export default function AdminPage() {
     }
   };
 
-  const saveScale = async (newScale: number) => {
-    if (isNaN(newScale) || newScale < 50 || newScale > 300) return;
-    setScaleSaving(true);
-    setScaleInput(newScale);
-    try {
-      const res = await fetch("/api/order", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scale: newScale }),
-      });
-      if (res.ok) {
-        setData((prev) => (prev ? { ...prev, scale: newScale } : prev));
-        showToast(`ডিসপ্লে স্কেল ${newScale}% সেট করা হয়েছে`);
-      }
-    } finally {
-      setScaleSaving(false);
-    }
-  };
-
   const saveWaterBottleCount = async (newCount: number) => {
     const validCount = Math.max(0, newCount);
     // Optimistic UI update
@@ -372,19 +342,6 @@ export default function AdminPage() {
             />
           </div>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowScaleModal(true)}
-              className="text-xs text-orange-300/80 hover:text-orange-300 bg-white/5 hover:bg-white/10 active:scale-95 border border-orange-400/25 rounded-lg px-2.5 sm:px-3 py-1.5 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
-              title="ডিসপ্লে স্কেল / জুম পরিবর্তন করুন"
-            >
-              <ZoomIn className="w-3.5 h-3.5 text-orange-400" />
-              <span>স্কেল</span>
-              <span className="bg-orange-500/20 text-orange-300 font-mono text-[10px] px-1.5 py-0.5 rounded font-bold">
-                {data?.scale ?? 100}%
-              </span>
-            </button>
-
             <a
               href="/"
               target="_blank"
@@ -462,59 +419,70 @@ export default function AdminPage() {
                     {data.currentOrder}
                   </span>
                 </div>
+
                 <div className="h-10 sm:h-12 w-px bg-white/10 mx-1 sm:mx-2" />
+
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
                     saveOrder();
                   }}
-                  className="flex items-center gap-2 flex-wrap"
+                  className="flex items-center gap-2 sm:gap-3 flex-wrap"
                   aria-busy={orderSaving || nextOrderSaving || prevOrderSaving || resetOrderSaving}
                 >
-                  <input
-                    type="number"
-                    min={1}
-                    value={orderInput}
-                    onChange={(e) => setOrderInput(e.target.value)}
-                    disabled={orderSaving || nextOrderSaving || prevOrderSaving || resetOrderSaving}
-                    className="w-20 sm:w-28 bg-white/10 border border-white/20 rounded-lg px-2.5 py-1.5 sm:py-2 text-base sm:text-lg font-bold text-white text-center focus:outline-none focus:border-orange-400/60 tabular-nums disabled:opacity-50"
-                  />
-                  <button
-                    type="submit"
-                    disabled={orderSaving || nextOrderSaving || prevOrderSaving || resetOrderSaving}
-                    className="bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-white font-bold px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm shrink-0 inline-flex items-center gap-1.5"
-                  >
-                    {orderSaving && (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
-                    )}
-                    {orderSaving ? "সেট হচ্ছে..." : "সেট করুন"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={savePrevOrder}
-                    disabled={orderSaving || nextOrderSaving || prevOrderSaving || resetOrderSaving || (data.currentOrder <= 1)}
-                    className="bg-white/10 hover:bg-white/20 disabled:opacity-50 text-white font-bold px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm border border-white/10 shrink-0 inline-flex items-center gap-1.5"
-                    title="আগের অর্ডার নম্বরে যান"
-                  >
-                    {prevOrderSaving && (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
-                    )}
-                    <Minus className="w-3.5 h-3.5" />
-                    <span>{prevOrderSaving ? "সেট হচ্ছে..." : "-১ পূর্ববর্তী"}</span>
-                  </button>
                   <button
                     type="button"
                     onClick={saveNextOrder}
                     disabled={orderSaving || nextOrderSaving || prevOrderSaving || resetOrderSaving}
-                    className="bg-white/10 hover:bg-white/20 disabled:opacity-50 text-white font-bold px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm border border-white/10 shrink-0 inline-flex items-center gap-1.5"
-                    title="পরবর্তী অর্ডার নম্বরে যান"
+                    className="flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 active:scale-95 disabled:opacity-50 text-white font-black px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl transition-all text-sm sm:text-base border border-emerald-400/40 shrink-0 cursor-pointer shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-500/20"
+                    title="পরবর্তী অর্ডার নম্বরে যান (+১)"
                   >
-                    {nextOrderSaving && (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
+                    {nextOrderSaving ? (
+                      <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+                    ) : (
+                      <Plus className="w-5 h-5 stroke-[2.5]" />
                     )}
-                    <Plus className="w-3.5 h-3.5" />
                     <span>{nextOrderSaving ? "সেট হচ্ছে..." : "+১ পরবর্তী"}</span>
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={savePrevOrder}
+                    disabled={orderSaving || nextOrderSaving || prevOrderSaving || resetOrderSaving || (data.currentOrder <= 1)}
+                    className="flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/20 active:scale-95 disabled:opacity-30 disabled:pointer-events-none text-white font-bold px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl border border-white/15 transition-all text-xs sm:text-sm shrink-0 cursor-pointer shadow-sm"
+                    title="আগের অর্ডার নম্বরে যান (-১)"
+                  >
+                    {prevOrderSaving && (
+                      <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                    )}
+                    <Minus className="w-4 h-4 stroke-[2.5]" />
+                    <span>{prevOrderSaving ? "সেট হচ্ছে..." : "-১ পূর্ববর্তী"}</span>
+                  </button>
+
+                  <div className="h-8 w-px bg-white/10 mx-1 hidden sm:block" />
+
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="number"
+                      min={1}
+                      value={orderInput}
+                      onChange={(e) => setOrderInput(e.target.value)}
+                      disabled={orderSaving || nextOrderSaving || prevOrderSaving || resetOrderSaving}
+                      className="w-18 sm:w-20 bg-white/10 border border-white/20 rounded-xl px-2.5 py-1.5 sm:py-2 text-sm sm:text-base font-bold text-white text-center focus:outline-none focus:border-orange-400/60 tabular-nums disabled:opacity-50"
+                      title="সরাসরি নম্বর লিখুন"
+                    />
+                    <button
+                      type="submit"
+                      disabled={orderSaving || nextOrderSaving || prevOrderSaving || resetOrderSaving}
+                      className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 border border-orange-500/30 active:scale-95 disabled:opacity-50 font-bold px-3 py-1.5 sm:py-2 rounded-xl transition-all text-xs sm:text-sm shrink-0 cursor-pointer"
+                      title="লিখা নম্বর সেট করুন"
+                    >
+                      {orderSaving && (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" aria-hidden="true" />
+                      )}
+                      {orderSaving ? "..." : "সেট"}
+                    </button>
+                  </div>
                 </form>
               </div>
             </section>
@@ -773,125 +741,6 @@ export default function AdminPage() {
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>হ্যাঁ, রিসেট করুন</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-
-      {showScaleModal && (
-        <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
-          onClick={() => setShowScaleModal(false)}
-        >
-          <div
-            className="w-full max-w-lg bg-[#180a03] border border-orange-500/30 rounded-2xl p-5 sm:p-6 shadow-2xl shadow-black flex flex-col gap-4 animate-in zoom-in-95 duration-200"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-orange-500/15 text-orange-400 border border-orange-500/30 shrink-0">
-                  <ZoomIn className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-white">
-                    ডিসপ্লে স্কেল / জুম (Display Scale)
-                  </h3>
-                  <p className="text-xs text-white/40">
-                    টিভি স্ক্রিনের সাইজ অনুযায়ী সাইজ পরিবর্তন করুন
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowScaleModal(false)}
-                className="text-white/40 hover:text-white transition-colors p-1.5 rounded-lg cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl px-4 py-3">
-              <span className="text-xs text-white/60 font-medium">বর্তমান স্কেল:</span>
-              <span className="text-2xl font-black text-orange-400 tabular-nums">
-                {scaleInput}%
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2.5 sm:gap-3 my-1">
-              <ZoomOut className="w-4 h-4 text-white/40 shrink-0" />
-              <span className="text-[11px] sm:text-xs text-white/40 font-mono shrink-0">50%</span>
-              <input
-                type="range"
-                min="50"
-                max="300"
-                step="1"
-                value={scaleInput}
-                onChange={(e) => setScaleInput(Number(e.target.value))}
-                onMouseUp={(e) => saveScale(Number((e.target as HTMLInputElement).value))}
-                onTouchEnd={(e) => saveScale(Number((e.target as HTMLInputElement).value))}
-                className="flex-1 accent-orange-500 cursor-pointer h-2 bg-white/20 rounded-lg min-w-0"
-              />
-              <span className="text-[11px] sm:text-xs text-white/40 font-mono shrink-0">300%</span>
-              <ZoomIn className="w-4 h-4 text-white/40 shrink-0" />
-            </div>
-
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-xs text-white/40">সরাসরি মান লিখুন:</span>
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <input
-                    type="number"
-                    min="50"
-                    max="300"
-                    value={scaleInput}
-                    onChange={(e) => setScaleInput(Number(e.target.value))}
-                    onKeyDown={(e) => e.key === "Enter" && saveScale(scaleInput)}
-                    className="w-20 sm:w-24 bg-white/10 border border-white/20 rounded-lg px-2.5 py-1.5 text-center font-bold text-sm text-white focus:outline-none focus:border-orange-400"
-                  />
-                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-white/40 font-bold pointer-events-none">%</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => saveScale(scaleInput)}
-                  disabled={scaleSaving}
-                  className="bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-white font-bold px-3.5 py-1.5 rounded-lg text-xs transition-colors shrink-0 cursor-pointer"
-                >
-                  {scaleSaving ? "…" : "সেভ"}
-                </button>
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-white/10">
-              <span className="text-xs font-semibold text-white/40 block mb-2">
-                কুইক সিলেক্ট (Quick Select):
-              </span>
-              <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
-                {[80, 90, 100, 110, 125, 150, 175, 200, 250, 300].map((val) => (
-                  <button
-                    key={val}
-                    type="button"
-                    onClick={() => saveScale(val)}
-                    disabled={scaleSaving}
-                    className={`py-2 px-1 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${(data?.scale ?? 100) === val
-                        ? "bg-orange-500 text-white shadow-md shadow-orange-500/30 scale-105 font-black"
-                        : "bg-white/10 hover:bg-white/20 text-white/70 border border-white/10"
-                      }`}
-                  >
-                    {val}%
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-2 border-t border-white/10">
-              <button
-                type="button"
-                onClick={() => setShowScaleModal(false)}
-                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white/80 hover:text-white text-xs sm:text-sm font-semibold transition-all cursor-pointer"
-              >
-                সম্পন্ন (Done)
               </button>
             </div>
           </div>

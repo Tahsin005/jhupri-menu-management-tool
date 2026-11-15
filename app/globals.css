@@ -10,13 +10,3 @@
 body, html {
   font-family: 'Hind Siliguri', 'Anek Bangla', 'Google Sans', 'Inter', system-ui, -apple-system, sans-serif;
 }
-
-.small-device-warning {
-  display: none;
-}
-
-@media (max-width: 1023px), (orientation: portrait), (max-height: 520px) {
-  .small-device-warning {
-    display: flex !important;
-  }
-}

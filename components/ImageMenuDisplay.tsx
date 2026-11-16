@@ -125,12 +125,18 @@ export default function ImageMenuDisplay({ data }: Props) {
           preserveAspectRatio="xMidYMid meet"
         >
           <defs>
-            <filter id="numShadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#000000" floodOpacity="0.85" />
-            </filter>
-
-            <filter id="ambientCard" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="8" stdDeviation="14" floodColor="#000000" floodOpacity="0.6" />
+            <filter id="distressedGrunge" x="-10%" y="-10%" width="120%" height="120%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.22" numOctaves="3" result="noise" />
+              <feColorMatrix
+                type="matrix"
+                values="1 0 0 0 0
+                        0 1 0 0 0
+                        0 0 1 0 0
+                        0 0 0 8 -1.6"
+                in="noise"
+                result="grungeMask"
+              />
+              <feComposite in="SourceGraphic" in2="grungeMask" operator="in" />
             </filter>
           </defs>
 
@@ -138,117 +144,85 @@ export default function ImageMenuDisplay({ data }: Props) {
 
           {showOrders && (
             <g id="order-display-cards" className="transition-all duration-300">
-              <g id="current-order-card" filter="url(#ambientCard)">
+              <g id="current-order-card">
                 <rect
-                  x="530"
-                  y="48"
-                  width="295"
-                  height="180"
-                  rx="20"
-                  ry="20"
-                  fill="#000000"
-                  fillOpacity="0.25"
-                  stroke="#c47a35"
-                  strokeWidth="1.5"
-                  strokeOpacity="0.35"
+                  x="598"
+                  y="56"
+                  width="294"
+                  height="238"
+                  rx="34"
+                  ry="34"
+                  fill="#1a0702"
+                  fillOpacity="0.95"
                 />
 
                 <text
-                  x="677"
-                  y="82"
+                  x="745"
+                  y="98"
                   textAnchor="middle"
                   fill="#dfa369"
                   fontSize="20"
-                  fontWeight="700"
-                  fontFamily="'Hind Siliguri', 'Anek Bangla', 'Georgia', serif"
-                  letterSpacing="1"
-                >
-                  এখন চলছে
-                </text>
-
-                <text
-                  x="677"
-                  y="162"
-                  textAnchor="middle"
-                  fill="#e8b958"
-                  fontSize="112"
-                  fontWeight="900"
-                  fontFamily="'Hind Siliguri', 'Georgia', 'Times New Roman', serif"
-                  style={{ fontVariantNumeric: "tabular-nums" }}
-                  filter="url(#numShadow)"
-                >
-                  {currentOrder}
-                </text>
-
-                <text
-                  x="677"
-                  y="196"
-                  textAnchor="middle"
-                  fill="#ffffff"
-                  fillOpacity="0.4"
-                  fontSize="10.5"
-                  fontWeight="700"
-                  fontFamily="'Google Sans', 'Inter', sans-serif"
-                  letterSpacing="3"
+                  fontWeight="800"
+                  fontFamily="'Google Sans', 'Inter', system-ui, sans-serif"
+                  letterSpacing="2.5"
                 >
                   CURRENT ORDER
                 </text>
+
+                <text
+                  x="745"
+                  y="230"
+                  textAnchor="middle"
+                  fill="#fed329"
+                  fontSize="142"
+                  fontWeight="900"
+                  fontFamily="'Bebas Neue', Impact, 'Arial Black', sans-serif"
+                  letterSpacing="4"
+                  filter="url(#distressedGrunge)"
+                  style={{ fontVariantNumeric: "tabular-nums" }}
+                >
+                  {currentOrder}
+                </text>
               </g>
 
-              <g id="next-order-card" filter="url(#ambientCard)">
+              <g id="next-order-card">
                 <rect
-                  x="875"
-                  y="48"
-                  width="295"
-                  height="180"
-                  rx="20"
-                  ry="20"
-                  fill="#000000"
-                  fillOpacity="0.25"
-                  stroke="#ffffff"
-                  strokeWidth="1.5"
-                  strokeOpacity="0.15"
+                  x="943"
+                  y="56"
+                  width="294"
+                  height="238"
+                  rx="34"
+                  ry="34"
+                  fill="#1a0702"
+                  fillOpacity="0.95"
                 />
 
                 <text
-                  x="1022"
-                  y="82"
+                  x="1090"
+                  y="98"
                   textAnchor="middle"
-                  fill="#e5e7eb"
+                  fill="#ffffff"
                   fontSize="20"
-                  fontWeight="700"
-                  fontFamily="'Hind Siliguri', 'Anek Bangla', 'Georgia', serif"
-                  letterSpacing="1"
-                >
-                  পরবর্তী
-                </text>
-
-                <text
-                  x="1022"
-                  y="162"
-                  textAnchor="middle"
-                  fill="#ffffff"
-                  fontSize="112"
-                  fontWeight="900"
-                  fontFamily="'Hind Siliguri', 'Georgia', 'Times New Roman', serif"
-                  style={{ fontVariantNumeric: "tabular-nums" }}
-                  filter="url(#numShadow)"
-                >
-                  {nextOrder}
-                </text>
-
-                <text
-                  x="1022"
-                  y="196"
-                  textAnchor="middle"
-                  fill="#ffffff"
-                  fillOpacity="0.4"
-                  fontSize="10.5"
-                  fontWeight="700"
-                  fontFamily="'Google Sans', 'Inter', sans-serif"
-                  letterSpacing="3"
+                  fontWeight="800"
+                  fontFamily="'Google Sans', 'Inter', system-ui, sans-serif"
+                  letterSpacing="2.5"
                 >
                   NEXT ORDER
+                </text>
+
+                <text
+                  x="1090"
+                  y="230"
+                  textAnchor="middle"
+                  fill="#ffffff"
+                  fontSize="142"
+                  fontWeight="900"
+                  fontFamily="'Bebas Neue', Impact, 'Arial Black', sans-serif"
+                  letterSpacing="4"
+                  filter="url(#distressedGrunge)"
+                  style={{ fontVariantNumeric: "tabular-nums" }}
+                >
+                  {nextOrder}
                 </text>
               </g>
             </g>

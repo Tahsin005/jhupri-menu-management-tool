@@ -1,10 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@100..800&family=Geomini:wght@200..800&family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@100..800&family=Bebas+Neue&family=Geomini:wght@200..800&family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: 'Hind Siliguri', 'Anek Bangla', 'Google Sans', 'Inter', system-ui, -apple-system, sans-serif;
   --font-serif: 'Hind Siliguri', 'Google Sans', 'Anek Bangla', serif;
   --font-bangla: 'Anek Bangla', sans-serif;
+  --font-display: 'Bebas Neue', Impact, 'Arial Black', sans-serif;
 }
 
 body, html {

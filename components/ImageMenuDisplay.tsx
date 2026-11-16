@@ -171,7 +171,7 @@ export default function ImageMenuDisplay({ data }: Props) {
                   y="162"
                   textAnchor="middle"
                   fill="#e8b958"
-                  fontSize="88"
+                  fontSize="112"
                   fontWeight="900"
                   fontFamily="'Hind Siliguri', 'Georgia', 'Times New Roman', serif"
                   style={{ fontVariantNumeric: "tabular-nums" }}
@@ -228,7 +228,7 @@ export default function ImageMenuDisplay({ data }: Props) {
                   y="162"
                   textAnchor="middle"
                   fill="#ffffff"
-                  fontSize="88"
+                  fontSize="112"
                   fontWeight="900"
                   fontFamily="'Hind Siliguri', 'Georgia', 'Times New Roman', serif"
                   style={{ fontVariantNumeric: "tabular-nums" }}

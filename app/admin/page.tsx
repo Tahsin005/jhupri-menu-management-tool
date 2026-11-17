@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   X,
   Loader2,
+  RefreshCw,
 } from "lucide-react";
 import { getPusherClient } from "@/lib/pusher-client";
 
@@ -94,6 +95,15 @@ export default function AdminPage() {
       const json: MenuData = await res.json();
       setData(json);
       setOrderInput(String(json.currentOrder));
+    }
+  }, []);
+
+  // Register service worker for PWA
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/sw.js", { scope: "/" })
+        .catch(() => {});
     }
   }, []);
 
@@ -342,6 +352,15 @@ export default function AdminPage() {
             />
           </div>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="text-xs text-orange-300/60 hover:text-orange-300 bg-white/5 hover:bg-white/10 border border-orange-400/20 rounded-lg px-2.5 sm:px-3 py-1.5 transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer"
+              title="পেজ রিফ্রেশ করুন"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">রিফ্রেশ</span>
+            </button>
             <a
               href="/"
               target="_blank"

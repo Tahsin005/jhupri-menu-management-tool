@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { MenuData } from "./menu-constants";
 
 interface Props {
@@ -12,11 +13,10 @@ interface ItemCoords {
   x2: number;
   y2: number;
   strikeY: number;
-  textX2: number;
 }
 
 // Pixel coordinates calibrated against public/original.jpg (1940 x 1094)
-// textX2 ends exactly at the text without crossing decorative emojis/icons
+// x1 starts before text; x2 extends through the emoji and price
 const ITEM_COORDINATES: Record<string, ItemCoords> = {
   // Fuchka items
   "Regular Fuchka": {
@@ -24,91 +24,198 @@ const ITEM_COORDINATES: Record<string, ItemCoords> = {
     y1: 390,
     x2: 915,
     y2: 440,
-    strikeY: 417,
-    textX2: 685,
+    strikeY: 414,
   },
   "Naga Fuchka": {
     x1: 148,
     y1: 440,
     x2: 915,
     y2: 490,
-    strikeY: 467,
-    textX2: 575,
+    strikeY: 463,
   },
   "Shahi Fuchka": {
     x1: 148,
     y1: 490,
     x2: 915,
     y2: 540,
-    strikeY: 515,
-    textX2: 645,
+    strikeY: 513,
   },
   "Doi Fuchka": {
     x1: 148,
     y1: 540,
     x2: 915,
-    y2: 590,
-    strikeY: 564,
-    textX2: 525,
+    y2: 594,
+    strikeY: 563,
   },
 
   // Chatpati items
   "Regular Chatpati": {
     x1: 148,
-    y1: 802,
+    y1: 799,
     x2: 915,
     y2: 852,
-    strikeY: 824,
-    textX2: 725,
+    strikeY: 828,
   },
   "Naga Chatpati": {
     x1: 148,
     y1: 852,
     x2: 915,
     y2: 902,
-    strikeY: 874,
-    textX2: 615,
+    strikeY: 878,
   },
   "Shahi Chatpati": {
     x1: 148,
     y1: 902,
     x2: 915,
-    y2: 952,
-    strikeY: 927,
-    textX2: 680,
+    y2: 956,
+    strikeY: 929,
   },
 
   // Corn items
   "Regular Masala Corn": {
     x1: 990,
-    y1: 802,
+    y1: 799,
     x2: 1835,
     y2: 852,
-    strikeY: 828,
-    textX2: 1682,
+    strikeY: 825,
   },
   "Sweet Chili Corn": {
     x1: 1165,
     y1: 852,
     x2: 1835,
     y2: 902,
-    strikeY: 874,
-    textX2: 1685,
+    strikeY: 875,
   },
   "Naga Corn": {
     x1: 1345,
     y1: 902,
     x2: 1835,
-    y2: 952,
-    strikeY: 928,
-    textX2: 1682,
+    y2: 954,
+    strikeY: 925,
   },
 };
+
+function getOrderNumberLayout(num: number): { fontSize: number; y: number } {
+  if (num >= 1000) return { fontSize: 92, y: 212 };
+  if (num >= 100) return { fontSize: 114, y: 220 };
+  return { fontSize: 142, y: 230 };
+}
+
+interface OrderCardProps {
+  id: string;
+  x: number;
+  label: string;
+  labelColor: string;
+  value: number;
+  valueColor: string;
+  cardRef?: React.RefObject<SVGGElement | null>;
+  showPulseRing?: boolean;
+}
+
+function OrderCard({
+  id,
+  x,
+  label,
+  labelColor,
+  value,
+  valueColor,
+  cardRef,
+  showPulseRing = false,
+}: OrderCardProps) {
+  const centerX = x + 147;
+  const { fontSize, y } = getOrderNumberLayout(value);
+
+  return (
+    <g id={id} ref={cardRef}>
+      <rect
+        x={x}
+        y={56}
+        width={294}
+        height={238}
+        rx={34}
+        ry={34}
+        fill="#1a0702"
+        fillOpacity="0.93"
+        stroke="#5c2811"
+        strokeOpacity="0.75"
+        strokeWidth="1.5"
+      />
+
+      {showPulseRing && (
+        <rect
+          x={x}
+          y={56}
+          width={294}
+          height={238}
+          rx={34}
+          ry={34}
+          fill="#fed329"
+          fillOpacity="0"
+          stroke="#fed329"
+          strokeOpacity="0"
+          strokeWidth="3.5"
+          className="order-card-ring"
+        />
+      )}
+
+      <text
+        x={centerX}
+        y={98}
+        textAnchor="middle"
+        fill={labelColor}
+        fontSize="20"
+        fontWeight="800"
+        fontFamily="'Google Sans', 'Inter', system-ui, sans-serif"
+        letterSpacing="2.5"
+      >
+        {label}
+      </text>
+
+      <text
+        x={centerX}
+        y={y}
+        textAnchor="middle"
+        fill={valueColor}
+        fontSize={fontSize}
+        fontWeight="900"
+        fontFamily="'Bebas Neue', Impact, 'Arial Black', sans-serif"
+        letterSpacing="4"
+        filter="url(#distressedGrunge)"
+        style={{ fontVariantNumeric: "tabular-nums" }}
+      >
+        {value}
+      </text>
+    </g>
+  );
+}
 
 export default function ImageMenuDisplay({ data }: Props) {
   const showOrders = data.showOrders !== false;
   const currentOrder = data.currentOrder ?? 1;
   const nextOrder = currentOrder + 1;
+
+  const currentCardRef = useRef<SVGGElement>(null);
+  const prevOrderRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const prev = prevOrderRef.current;
+    prevOrderRef.current = currentOrder;
+    if (prev === null || prev === currentOrder) return;
+
+    const el = currentCardRef.current;
+    if (!el) return;
+
+    el.classList.remove("order-card-pulse");
+    // Force reflow so consecutive rapid updates re-trigger the highlight animation
+    void el.getBoundingClientRect();
+    el.classList.add("order-card-pulse");
+
+    const timer = setTimeout(() => {
+      el.classList.remove("order-card-pulse");
+    }, 1700);
+
+    return () => clearTimeout(timer);
+  }, [currentOrder]);
 
   return (
     <div className="w-full h-full flex items-center justify-center bg-[#0c0502] overflow-hidden select-none">
@@ -144,87 +251,24 @@ export default function ImageMenuDisplay({ data }: Props) {
 
           {showOrders && (
             <g id="order-display-cards" className="transition-all duration-300">
-              <g id="current-order-card">
-                <rect
-                  x="598"
-                  y="56"
-                  width="294"
-                  height="238"
-                  rx="34"
-                  ry="34"
-                  fill="#1a0702"
-                  fillOpacity="0.95"
-                />
-
-                <text
-                  x="745"
-                  y="98"
-                  textAnchor="middle"
-                  fill="#dfa369"
-                  fontSize="20"
-                  fontWeight="800"
-                  fontFamily="'Google Sans', 'Inter', system-ui, sans-serif"
-                  letterSpacing="2.5"
-                >
-                  CURRENT ORDER
-                </text>
-
-                <text
-                  x="745"
-                  y="230"
-                  textAnchor="middle"
-                  fill="#fed329"
-                  fontSize="142"
-                  fontWeight="900"
-                  fontFamily="'Bebas Neue', Impact, 'Arial Black', sans-serif"
-                  letterSpacing="4"
-                  filter="url(#distressedGrunge)"
-                  style={{ fontVariantNumeric: "tabular-nums" }}
-                >
-                  {currentOrder}
-                </text>
-              </g>
-
-              <g id="next-order-card">
-                <rect
-                  x="943"
-                  y="56"
-                  width="294"
-                  height="238"
-                  rx="34"
-                  ry="34"
-                  fill="#1a0702"
-                  fillOpacity="0.95"
-                />
-
-                <text
-                  x="1090"
-                  y="98"
-                  textAnchor="middle"
-                  fill="#ffffff"
-                  fontSize="20"
-                  fontWeight="800"
-                  fontFamily="'Google Sans', 'Inter', system-ui, sans-serif"
-                  letterSpacing="2.5"
-                >
-                  NEXT ORDER
-                </text>
-
-                <text
-                  x="1090"
-                  y="230"
-                  textAnchor="middle"
-                  fill="#ffffff"
-                  fontSize="142"
-                  fontWeight="900"
-                  fontFamily="'Bebas Neue', Impact, 'Arial Black', sans-serif"
-                  letterSpacing="4"
-                  filter="url(#distressedGrunge)"
-                  style={{ fontVariantNumeric: "tabular-nums" }}
-                >
-                  {nextOrder}
-                </text>
-              </g>
+              <OrderCard
+                id="current-order-card"
+                x={598}
+                label="CURRENT ORDER"
+                labelColor="#dfa369"
+                value={currentOrder}
+                valueColor="#fed329"
+                cardRef={currentCardRef}
+                showPulseRing
+              />
+              <OrderCard
+                id="next-order-card"
+                x={943}
+                label="NEXT ORDER"
+                labelColor="#ffffff"
+                value={nextOrder}
+                valueColor="#ffffff"
+              />
             </g>
           )}
 
@@ -233,7 +277,7 @@ export default function ImageMenuDisplay({ data }: Props) {
             const coords = ITEM_COORDINATES[item.name];
             if (!coords) return null;
 
-            const { x1, y1, x2, y2, strikeY, textX2 } = coords;
+            const { x1, y1, x2, y2, strikeY } = coords;
 
             return (
               <g
@@ -248,18 +292,18 @@ export default function ImageMenuDisplay({ data }: Props) {
                   height={y2 - y1}
                   rx="8"
                   ry="8"
-                  fill="#000000"
-                  fillOpacity="0.55"
+                  fill="#120401"
+                  fillOpacity="0.80"
                 />
 
                 <rect
                   x={x1}
                   y={strikeY - 1}
-                  width={textX2 - x1}
+                  width={x2 - x1}
                   height={2}
                   rx={1}
-                  fill="#ffffff"
-                  fillOpacity="0.65"
+                  fill="#f5d5b8"
+                  fillOpacity="0.60"
                 />
               </g>
             );

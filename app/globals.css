@@ -11,3 +11,51 @@
 body, html {
   font-family: 'Hind Siliguri', 'Anek Bangla', 'Google Sans', 'Inter', system-ui, -apple-system, sans-serif;
 }
+
+@keyframes order-card-flash {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(254, 211, 41, 0));
+  }
+  18% {
+    transform: scale(1.045);
+    filter: drop-shadow(0 0 24px rgba(254, 211, 41, 0.5));
+  }
+  55% {
+    transform: scale(1.018);
+    filter: drop-shadow(0 0 14px rgba(254, 211, 41, 0.25));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(254, 211, 41, 0));
+  }
+}
+
+@keyframes order-ring-flash {
+  0% {
+    stroke-opacity: 0;
+    fill-opacity: 0;
+  }
+  18% {
+    stroke-opacity: 0.9;
+    fill-opacity: 0.14;
+  }
+  55% {
+    stroke-opacity: 0.45;
+    fill-opacity: 0.05;
+  }
+  100% {
+    stroke-opacity: 0;
+    fill-opacity: 0;
+  }
+}
+
+.order-card-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: order-card-flash 1.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.order-card-pulse .order-card-ring {
+  animation: order-ring-flash 1.6s cubic-bezier(0.22, 1, 0.36, 1);
+}

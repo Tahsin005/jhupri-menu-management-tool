@@ -10,4 +10,5 @@ export interface MenuData {
   currentOrder: number;
   waterBottleCount?: number;
   showOrders?: boolean;
+  showPayFirst?: boolean;
 }

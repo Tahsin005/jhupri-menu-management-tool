@@ -26,13 +26,14 @@ export default function MenuDisplay() {
 
     channel.bind(
       "order-update",
-      (payload: { currentOrder?: number; showOrders?: boolean }) => {
+      (payload: { currentOrder?: number; showOrders?: boolean; showPayFirst?: boolean }) => {
         setData((prev) => {
           if (!prev) return prev;
           return {
             ...prev,
             currentOrder: payload.currentOrder ?? prev.currentOrder,
             showOrders: payload.showOrders ?? prev.showOrders,
+            showPayFirst: payload.showPayFirst ?? prev.showPayFirst,
           };
         });
       }

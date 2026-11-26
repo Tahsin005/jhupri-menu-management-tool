@@ -15,22 +15,10 @@ import {
   X,
   Loader2,
   RefreshCw,
+  Megaphone,
 } from "lucide-react";
 import { getPusherClient } from "@/lib/pusher-client";
-
-interface MenuItem {
-  _id: string;
-  name: string;
-  category: "fuchka" | "chatpati" | "corn";
-  available: boolean;
-}
-
-interface MenuData {
-  items: MenuItem[];
-  currentOrder: number;
-  waterBottleCount?: number;
-  showOrders?: boolean;
-}
+import { MenuItem, MenuData } from "@/components/menu-constants";
 
 const CATEGORY_LABELS: Record<string, string> = {
   fuchka: "ফুচকা | Fuchka",
@@ -70,6 +58,47 @@ const CATEGORY_COLORS: Record<string, string> = {
   corn: "bg-yellow-500/10 border-yellow-500/30",
 };
 
+interface VisibilityToggleProps {
+  enabled: boolean;
+  saving: boolean;
+  onToggle: () => void;
+  title: string;
+}
+
+function VisibilityToggle({ enabled, saving, onToggle, title }: VisibilityToggleProps) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      disabled={saving}
+      className="flex items-center gap-2 bg-white/5 hover:bg-white/10 active:scale-95 px-2.5 py-1 rounded-lg border border-white/10 transition-all cursor-pointer shrink-0"
+      title={title}
+    >
+      <span className="text-[11px] sm:text-xs text-white/60">Show:</span>
+      <span
+        className={`text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded ${
+          enabled
+            ? "bg-green-500/20 text-green-400 border border-green-500/30"
+            : "bg-red-500/20 text-red-400 border border-red-500/30"
+        }`}
+      >
+        {enabled ? "on" : "off"}
+      </span>
+      <span
+        className={`w-7 sm:w-8 h-4 sm:h-4.5 rounded-full transition-colors relative inline-flex items-center p-0.5 ${
+          enabled ? "bg-green-500" : "bg-white/20"
+        }`}
+      >
+        <span
+          className={`w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-full bg-white transition-transform ${
+            enabled ? "translate-x-3 sm:translate-x-3.5" : "translate-x-0"
+          }`}
+        />
+      </span>
+    </button>
+  );
+}
+
 export default function AdminPage() {
   const [data, setData] = useState<MenuData | null>(null);
   const [orderInput, setOrderInput] = useState("");
@@ -80,6 +109,7 @@ export default function AdminPage() {
   const [resetOrderSaving, setResetOrderSaving] = useState(false);
   const [showResetOrderModal, setShowResetOrderModal] = useState(false);
   const [showOrdersSaving, setShowOrdersSaving] = useState(false);
+  const [showPayFirstSaving, setShowPayFirstSaving] = useState(false);
   const [waterSaving, setWaterSaving] = useState(false);
   const [showResetWaterModal, setShowResetWaterModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -115,7 +145,12 @@ export default function AdminPage() {
 
     channel.bind(
       "order-update",
-      (payload: { currentOrder?: number; waterBottleCount?: number; showOrders?: boolean }) => {
+      (payload: {
+        currentOrder?: number;
+        waterBottleCount?: number;
+        showOrders?: boolean;
+        showPayFirst?: boolean;
+      }) => {
         setData((prev) => {
           if (!prev) return prev;
           return {
@@ -123,6 +158,7 @@ export default function AdminPage() {
             currentOrder: payload.currentOrder ?? prev.currentOrder,
             waterBottleCount: payload.waterBottleCount ?? prev.waterBottleCount,
             showOrders: payload.showOrders ?? prev.showOrders,
+            showPayFirst: payload.showPayFirst ?? prev.showPayFirst,
           };
         });
         if (typeof payload.currentOrder === "number") {
@@ -270,32 +306,49 @@ export default function AdminPage() {
     }
   };
 
-  const toggleShowOrders = async () => {
-    const current = data?.showOrders !== false;
+  const toggleDisplayFlag = async (
+    key: "showOrders" | "showPayFirst",
+    setFlagSaving: (val: boolean) => void,
+    onToastText: string,
+    offToastText: string
+  ) => {
+    const current = data?.[key] !== false;
     const nextVal = !current;
-    setData((prev) => (prev ? { ...prev, showOrders: nextVal } : prev));
-    setShowOrdersSaving(true);
+    setData((prev) => (prev ? { ...prev, [key]: nextVal } : prev));
+    setFlagSaving(true);
     try {
       const res = await fetch("/api/order", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ showOrders: nextVal }),
+        body: JSON.stringify({ [key]: nextVal }),
       });
       if (res.ok) {
-        showToast(
-          nextVal
-            ? "টিভি স্ক্রিনে অর্ডার নম্বর প্রদর্শন চালু করা হয়েছে"
-            : "টিভি স্ক্রিনে অর্ডার নম্বর প্রদর্শন বন্ধ করা হয়েছে"
-        );
+        showToast(nextVal ? onToastText : offToastText);
       } else {
         fetchMenu();
       }
     } catch {
       fetchMenu();
     } finally {
-      setShowOrdersSaving(false);
+      setFlagSaving(false);
     }
   };
+
+  const toggleShowOrders = () =>
+    toggleDisplayFlag(
+      "showOrders",
+      setShowOrdersSaving,
+      "টিভি স্ক্রিনে অর্ডার নম্বর প্রদর্শন চালু করা হয়েছে",
+      "টিভি স্ক্রিনে অর্ডার নম্বর প্রদর্শন বন্ধ করা হয়েছে"
+    );
+
+  const toggleShowPayFirst = () =>
+    toggleDisplayFlag(
+      "showPayFirst",
+      setShowPayFirstSaving,
+      "টিভি স্ক্রিনে Pay First মার্কি চালু করা হয়েছে",
+      "টিভি স্ক্রিনে Pay First মার্কি বন্ধ করা হয়েছে"
+    );
 
   const saveWaterBottleCount = async (newCount: number) => {
     const validCount = Math.max(0, newCount);
@@ -387,35 +440,16 @@ export default function AdminPage() {
                     অর্ডার নম্বর
                   </h2>
                   <div className="h-4 w-px bg-white/20 hidden sm:block" />
-                  <button
-                    type="button"
-                    onClick={toggleShowOrders}
-                    disabled={showOrdersSaving}
-                    className="flex items-center gap-2 bg-white/5 hover:bg-white/10 active:scale-95 px-2.5 py-1 rounded-lg border border-white/10 transition-all cursor-pointer"
-                    title={data.showOrders !== false ? "টিভিতে অর্ডার নম্বর বন্ধ করুন" : "টিভিতে অর্ডার নম্বর চালু করুন"}
-                  >
-                      <span className="text-[11px] sm:text-xs text-white/60">Show:</span>
-                    <span
-                      className={`text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded ${
-                        data.showOrders !== false
-                          ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                          : "bg-red-500/20 text-red-400 border border-red-500/30"
-                      }`}
-                    >
-                      {data.showOrders !== false ? "on" : "off"}
-                    </span>
-                    <span
-                      className={`w-7 sm:w-8 h-4 sm:h-4.5 rounded-full transition-colors relative inline-flex items-center p-0.5 ${
-                        data.showOrders !== false ? "bg-green-500" : "bg-white/20"
-                      }`}
-                    >
-                      <span
-                        className={`w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-full bg-white transition-transform ${
-                          data.showOrders !== false ? "translate-x-3 sm:translate-x-3.5" : "translate-x-0"
-                        }`}
-                      />
-                    </span>
-                  </button>
+                  <VisibilityToggle
+                    enabled={data.showOrders !== false}
+                    saving={showOrdersSaving}
+                    onToggle={toggleShowOrders}
+                    title={
+                      data.showOrders !== false
+                        ? "টিভিতে অর্ডার নম্বর বন্ধ করুন"
+                        : "টিভিতে অর্ডার নম্বর চালু করুন"
+                    }
+                  />
                 </div>
 
                 <button
@@ -503,6 +537,35 @@ export default function AdminPage() {
                     </button>
                   </div>
                 </form>
+              </div>
+            </section>
+
+            <section className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-400/30 shrink-0">
+                    <Megaphone className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="text-base sm:text-lg font-bold text-white/90 leading-tight">
+                      আগে পেমেন্ট নোটিশ (Pay First)
+                    </h2>
+                    <p className="text-[11px] sm:text-xs text-white/40 leading-tight">
+                      টিভি স্ক্রিনের নিচে স্ক্রলিং মার্কি ব্যানার
+                    </p>
+                  </div>
+                </div>
+
+                <VisibilityToggle
+                  enabled={data.showPayFirst !== false}
+                  saving={showPayFirstSaving}
+                  onToggle={toggleShowPayFirst}
+                  title={
+                    data.showPayFirst !== false
+                      ? "টিভিতে Pay First মার্কি বন্ধ করুন"
+                      : "টিভিতে Pay First মার্কি চালু করুন"
+                  }
+                />
               </div>
             </section>
 

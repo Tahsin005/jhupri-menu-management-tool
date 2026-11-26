@@ -4,6 +4,7 @@ export interface IOrderState extends Document {
   currentOrder: number;
   waterBottleCount: number;
   showOrders: boolean;
+  showPayFirst: boolean;
 }
 
 const OrderStateSchema = new Schema<IOrderState>(
@@ -11,6 +12,7 @@ const OrderStateSchema = new Schema<IOrderState>(
     currentOrder: { type: Number, default: 1 },
     waterBottleCount: { type: Number, default: 0 },
     showOrders: { type: Boolean, default: true },
+    showPayFirst: { type: Boolean, default: true },
   },
   { timestamps: true }
 );

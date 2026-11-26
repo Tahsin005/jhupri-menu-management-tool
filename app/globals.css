@@ -59,3 +59,19 @@ body, html {
 .order-card-pulse .order-card-ring {
   animation: order-ring-flash 1.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+@keyframes pay-first-marquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.pay-first-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: pay-first-marquee 26s linear infinite;
+  will-change: transform;
+}

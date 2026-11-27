@@ -77,7 +77,7 @@ export default function PayFirstMarquee() {
         </div>
       </foreignObject>
 
-      <g transform="rotate(-1.2 140 1057)" filter="url(#distressedGrunge)">
+      <g filter="url(#distressedGrunge)">
         <rect
           x="18"
           y="1028"
